@@ -78,8 +78,8 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
     - name: Terraform Init
-      run: terraform init -backend-config="storage_account_name=${{ secrets.STORAGE_ACCOUNT_NAME }}" -backend-config="container_name=${{ secrets.CONTAINER_NAME }}" -backend-config="key=terraform.tfstate" -backend-config="resource_group_name=testrg" -backend-config="subscription_id=8275bd32-2df4-4467-9201-597dbf8e04a5"
-
+      run: terraform init
+      
     - name: Terraform Plan
       run: terraform plan -input=false
 
@@ -106,7 +106,7 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
     - name: Terraform Init
-      run: terraform init -backend-config="storage_account_name=${{ secrets.STORAGE_ACCOUNT_NAME }}" -backend-config="container_name=${{ secrets.CONTAINER_NAME }}" -backend-config="key=terraform.tfstate" -backend-config="resource_group_name=testrg" -backend-config="subscription_id=8275bd32-2df4-4467-9201-597dbf8e04a5"
+      run: terraform init
 
     - name: Terraform Apply
       run: terraform apply -auto-approve -input=false
