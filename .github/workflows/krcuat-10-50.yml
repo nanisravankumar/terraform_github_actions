@@ -11,17 +11,6 @@ on:
 permissions:
   contents: read
 
-env:
-  ARM_CLIENT_ID: 1e64c265-1a41-4adf-972b-16845e7d0c22
-  ARM_CLIENT_SECRET: ${{ secrets.ARM_NON_PROD_CLIENT_SECRET }}
-  ARM_SUBSCRIPTION_ID: 8275bd32-2df4-4467-9201-597dbf8e04a5
-  ARM_TENANT_ID: 0cb5cf3e-229f-499e-9e48-d9a50a041577
-  TF_PATH: ./env/base/10-network/
-  VAR_PATH: ../../koreacentral/uat/10-network/10-network.auto.tfvars
-  BACKEND_CONFIG_RESOURCE_GROUP_NAME: rg-econ-prod-state
-  BACKEND_CONFIG_STORAGE_ACCOUNT_NAME: srsteconprodstate
-  BACKEND_CONFIG_CONTAINER_NAME: stceconprodstate
-
 jobs:
   terraform:
     name: 'Terraform'
@@ -48,16 +37,16 @@ jobs:
 
     - name: Terraform Init
       run: |
-        cd ${TF_PATH}
-        terraform init -backend-config="key=10-network.tfstate" -backend-config="resource_group_name=${BACKEND_CONFIG_RESOURCE_GROUP_NAME}" -backend-config="storage_account_name=${BACKEND_CONFIG_STORAGE_ACCOUNT_NAME}" -backend-config="container_name=${BACKEND_CONFIG_CONTAINER_NAME}"
+        cd ./env/base/10-network/
+        terraform init -backend-config="key=10-network.tfstate" -backend-config="resource_group_name=rg-econ-prod-state" -backend-config="storage_account_name=srsteconprodstate" -backend-config="container_name=stceconprodstate"
 
     - name: Terraform Plan
       run: |
-        cd ${TF_PATH}
-        terraform plan -var-file="${VAR_PATH}" -out=tfplan
+        cd ./env/base/10-network/
+        terraform plan -var-file="../../koreacentral/uat/10-network/10-network.auto.tfvars" -out=tfplan
 
     - name: Terraform Apply
       if: github.ref == 'refs/heads/master' && github.event_name == 'push'
       run: |
-        cd ${TF_PATH}
+        cd ./env/base/10-network/
         terraform apply -auto-approve tfplan
