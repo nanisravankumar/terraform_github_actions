@@ -202,7 +202,7 @@ jobs:
       run: terraform init
 
     - name: Terraform Plan
-      run: terraform plan -input=false
+      run: terraform destroy -input=false
 
   terraform-apply:
     name: 'Terraform Apply'
@@ -230,7 +230,7 @@ jobs:
       run: terraform init
 
     - name: Terraform Apply
-      run: terraform apply -auto-approve -input=false
+      run: terraform destroy -auto-approve -input=false
 ```
 
 ```
