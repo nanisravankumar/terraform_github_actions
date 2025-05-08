@@ -16,15 +16,15 @@ env:
   ARM_CLIENT_SECRET: ${{ secrets.ARM_NON_PROD_CLIENT_SECRET }}
   ARM_SUBSCRIPTION_ID: 8275bd32-2df4-4467-9201-597dbf8e04a5
   ARM_TENANT_ID: 0cb5cf3e-229f-499e-9e48-d9a50a041577
-  TF_PATH: ./env/base/
-  VAR_PATH: ../../koreacentral/uat/
+  TF_PATH: ./env/base/10-network/
+  VAR_PATH: ../../koreacentral/uat/10-network/10-network.auto.tfvars
   BACKEND_CONFIG_RESOURCE_GROUP_NAME: rg-econ-prod-state
   BACKEND_CONFIG_STORAGE_ACCOUNT_NAME: srsteconprodstate
   BACKEND_CONFIG_CONTAINER_NAME: stceconprodstate
 
 jobs:
-  terraform-plan:
-    name: 'Terraform Plan'
+  terraform:
+    name: 'Terraform'
     runs-on: ubuntu-latest
     environment: production
 
@@ -48,48 +48,16 @@ jobs:
 
     - name: Terraform Init
       run: |
-        cd ${TF_PATH}${{ github.event.inputs.terraform_module }}
-        terraform init -backend-config="key=${{ github.event.inputs.terraform_module }}.tfstate" -backend-config="resource_group_name=${BACKEND_CONFIG_RESOURCE_GROUP_NAME}" -backend-config="storage_account_name=${BACKEND_CONFIG_STORAGE_ACCOUNT_NAME}" -backend-config="container_name=${BACKEND_CONFIG_CONTAINER_NAME}"
+        cd ${TF_PATH}
+        terraform init -backend-config="key=10-network.tfstate" -backend-config="resource_group_name=${BACKEND_CONFIG_RESOURCE_GROUP_NAME}" -backend-config="storage_account_name=${BACKEND_CONFIG_STORAGE_ACCOUNT_NAME}" -backend-config="container_name=${BACKEND_CONFIG_CONTAINER_NAME}"
 
     - name: Terraform Plan
       run: |
-        cd ${TF_PATH}${{ github.event.inputs.terraform_module }}
-        terraform plan -out=tfplan
-
-  terraform-apply:
-    name: 'Terraform Apply'
-    runs-on: ubuntu-latest
-    needs: terraform-plan
-    environment: production
-
-    defaults:
-      run:
-        shell: bash
-
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
-      with:
-        terraform_version: 1.11.4
-
-    - name: Azure Login
-      uses: azure/login@v2
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-    - name: Terraform Init
-      run: |
-        cd ${TF_PATH}${{ github.event.inputs.terraform_module }}
-        terraform init -backend-config="key=${{ github.event.inputs.terraform_module }}.tfstate" -backend-config="resource_group_name=${BACKEND_CONFIG_RESOURCE_GROUP_NAME}" -backend-config="storage_account_name=${BACKEND_CONFIG_STORAGE_ACCOUNT_NAME}" -backend-config="container_name=${BACKEND_CONFIG_CONTAINER_NAME}"
+        cd ${TF_PATH}
+        terraform plan -var-file="${VAR_PATH}" -out=tfplan
 
     - name: Terraform Apply
+      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
       run: |
-        cd ${TF_PATH}${{ github.event.inputs.terraform_module }}
+        cd ${TF_PATH}
         terraform apply -auto-approve tfplan
-
-
-
-        
