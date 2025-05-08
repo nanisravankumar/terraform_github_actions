@@ -1,39 +1,8 @@
 name: 'KRCUAT 10-50'
 
 on:
-  workflow_dispatch:
-    inputs:
-      azure_id:
-        type: string
-        description: Azure Resource ID
-      azurerm_placeholder: 
-        type: string
-        description: AzureRM Resource Type with Local Name in dot format
-      terraform_action:
-        type: choice
-        description: Select terraform action
-        default: plan
-        options:
-          - apply
-          - plan
-          - import
-      terraform_run_mode:
-        type: choice
-        description: Select terraform run mode
-        default: module
-        options:
-          - normal
-          - module
-      terraform_module:
-        type: choice
-        description: Select terraform Module
-        default: 10-network
-        options:
-          - 10-network
-          - 20-foundation
-          - 30-storage
-          - 40-databases
-          - 50-aks
+  push:
+    branches: [ "master" ]
   pull_request:
     paths:
       - 'env/base/**'
@@ -80,7 +49,7 @@ jobs:
     - name: Terraform Init
       run: |
         cd ${TF_PATH}${{ github.event.inputs.terraform_module }}
-        terraform init
+        terraform init -backend-config="key=${{ github.event.inputs.terraform_module }}.tfstate" -backend-config="resource_group_name=${BACKEND_CONFIG_RESOURCE_GROUP_NAME}" -backend-config="storage_account_name=${BACKEND_CONFIG_STORAGE_ACCOUNT_NAME}" -backend-config="container_name=${BACKEND_CONFIG_CONTAINER_NAME}"
 
     - name: Terraform Plan
       run: |
@@ -105,6 +74,7 @@ jobs:
       uses: hashicorp/setup-terraform@v1
       with:
         terraform_version: 1.11.4
+
     - name: Azure Login
       uses: azure/login@v2
       with:
