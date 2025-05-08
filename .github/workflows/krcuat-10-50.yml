@@ -43,8 +43,8 @@ env:
   TF_PATH: ./env/base/
   VAR_PATH: ../../koreacentral/uat/
   BACKEND_CONFIG_RESOURCE_GROUP_NAME: rg-econ-prod-state
-  BACKEND_CONFIG_STORAGE_ACCOUNT_NAME: storacctterraform
-  BACKEND_CONFIG_CONTAINER_NAME: stceconkrcuatstate
+  BACKEND_CONFIG_STORAGE_ACCOUNT_NAME: srsteconprodstate
+  BACKEND_CONFIG_CONTAINER_NAME: stceconprodstate
 
 jobs:
   krcuat-10-50-module:
