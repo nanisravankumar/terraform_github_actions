@@ -6,13 +6,11 @@ terraform {
     key                  = "10-network.tfstate"
   }
 }
+
 provider "azurerm" {
   features {}
 }
 
-# ------------------
-# resource group for this environment
-# ------------------
 resource "azurerm_resource_group" "econcloud" {
   name     = "${var.prefix}cloud-resources-${var.environment}"
   location = var.location
