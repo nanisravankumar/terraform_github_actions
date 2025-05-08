@@ -233,6 +233,55 @@ jobs:
       run: terraform apply -auto-approve -input=false
 ```
 
+```
+## working terraform code without manual approval
+# name: 'Terraform'
+
+# on:
+#   push:
+#     branches: [ "master" ]
+#   pull_request:
+
+# permissions:
+#   contents: read
+
+# jobs:
+#   terraform:
+#     name: 'Terraform'
+#     runs-on: ubuntu-latest
+#     environment: production
+
+#     defaults:
+#       run:
+#         shell: bash
+
+#     steps:
+#     - name: Checkout
+#       uses: actions/checkout@v4
+
+
+#     - name: Setup Terraform
+#       uses: hashicorp/setup-terraform@v1
+
+#     - name: Azure Login
+#       uses: azure/login@v2
+#       with:
+#         creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+#     - name: Terraform Init
+#       run: terraform init
+
+#     # - name: Terraform Format
+#     #   run: terraform fmt -check
+
+#     - name: Terraform Plan
+#       run: terraform plan -input=false
+
+#     - name: Terraform Apply
+#       if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+#       run: terraform apply -auto-approve -input=false
+```
+
 This workflow will:
 
 * **Terraform Plan**: Preview the changes.
