@@ -36,7 +36,9 @@ resource "azurerm_private_endpoint" "storaccountbackup" {
 # VELERO backup container
 # ------------------
 resource "azurerm_storage_container" "velero" {
-  name                  = "velero"
-  storage_account_id    = azurerm_storage_account.storaccountbackup.id
+  name                  = "velero01"
+#   storage_account_id    = azurerm_storage_account.storaccountbackup.id
   container_access_type = "private"
+  storage_account_name = azurerm_storage_account.storaccountbackup.name
+  depends_on = [ azurerm_storage_account.storaccountbackup ]
 }
