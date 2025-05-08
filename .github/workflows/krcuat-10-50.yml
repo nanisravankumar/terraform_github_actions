@@ -1,4 +1,4 @@
-name: KRCUAT 10-50
+name: 'KRCUAT 10-50'
 
 on:
   workflow_dispatch:
@@ -39,6 +39,9 @@ on:
       - 'env/base/**'
       - 'env/koreacentral/uat/**'
 
+permissions:
+  contents: read
+
 env:
   ARM_CLIENT_ID: 1e64c265-1a41-4adf-972b-16845e7d0c22
   ARM_CLIENT_SECRET: ${{ secrets.ARM_NON_PROD_CLIENT_SECRET }}
@@ -51,103 +54,68 @@ env:
   BACKEND_CONFIG_CONTAINER_NAME: stceconprodstate
 
 jobs:
-  krcuat-10-50-module:
-    name: Terraform module execution for ${{ github.event.inputs.terraform_module }}
-    environment:
-      name: krcuat
+  terraform-plan:
+    name: 'Terraform Plan'
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.terraform_run_mode == 'module' }}
+    environment: production
+
+    defaults:
+      run:
+        shell: bash
 
     steps:
-      - uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v4
 
-      - uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_version: 1.11.4
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: 1.11.4
 
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-            creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Show terraform version
-        run: |
-          cd ${TF_PATH}${{ github.event.inputs.terraform_module }}
-          terraform version
+    - name: Terraform Init
+      run: |
+        cd ${TF_PATH}${{ github.event.inputs.terraform_module }}
+        terraform init
 
-      - name: Create terraform plan for ${{ github.event.inputs.terraform_module }}
-        id: plan
-        run: |
-          cd ${TF_PATH}${{ github.event.inputs.terraform_module }}
-          terraform init
-          terraform plan 
+    - name: Terraform Plan
+      run: |
+        cd ${TF_PATH}${{ github.event.inputs.terraform_module }}
+        terraform plan -out=tfplan
 
-      - name: Apply terraform plan for ${{ github.event.inputs.terraform_module }}
-        if: ${{ github.event_name != 'pull_request' && github.event.inputs.terraform_action == 'apply' }}
-        run: |
-          cd ${TF_PATH}${{ github.event.inputs.terraform_module }}
-          terraform init -backend-config="key=${{ github.event.inputs.terraform_module }}.tfstate" -backend-config="resource_group_name=${BACKEND_CONFIG_RESOURCE_GROUP_NAME}" -backend-config="storage_account_name=${BACKEND_CONFIG_STORAGE_ACCOUNT_NAME}" -backend-config="container_name=${BACKEND_CONFIG_CONTAINER_NAME}"
-          terraform apply plan
-
-  krcuat-10-50:
-    environment:
-      name: krcuat
+  terraform-apply:
+    name: 'Terraform Apply'
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.terraform_run_mode != 'module' }}
-    timeout-minutes: 30
-    strategy:
-      max-parallel: 1
-      fail-fast: false
-      matrix:
-        module:
-          - 10-network
-          - 20-foundation
-          - 30-storage
-          - 40-databases
-          - 50-aks
+    needs: terraform-plan
+    environment: production
+
+    defaults:
+      run:
+        shell: bash
 
     steps:
-      - uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v4
 
-      - uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_version: 1.11.4
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: 1.11.4
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-            creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: Terraform Init
+      run: |
+        cd ${TF_PATH}${{ github.event.inputs.terraform_module }}
+        terraform init -backend-config="key=${{ github.event.inputs.terraform_module }}.tfstate" -backend-config="resource_group_name=${BACKEND_CONFIG_RESOURCE_GROUP_NAME}" -backend-config="storage_account_name=${BACKEND_CONFIG_STORAGE_ACCOUNT_NAME}" -backend-config="container_name=${BACKEND_CONFIG_CONTAINER_NAME}"
 
-      - name: Validate and check format of terraform
-        if: ${{ github.event_name == 'pull_request'}}
-        run: |
-          cd ${TF_PATH}${{ matrix.module }}
-          terraform init -backend=false
-          terraform validate
-
-      - name: Create terraform plan
-        id: plan
-        run: |
-          cd ${TF_PATH}${{ matrix.module }}
-          terraform init
-          terraform plan 
-
-      - name: Post plan diff to PR
-        uses: robburger/terraform-pr-commenter@v1
-        if: always() && github.event_name == 'pull_request' && (steps.plan.outcome == 'success' || steps.plan.outcome == 'failure')
-        continue-on-error: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.TF_GITHUB_TOKEN }}
-          TF_WORKSPACE:  ${{ github.workflow }}
-          EXPAND_SUMMARY_DETAILS: false
-        with:
-          commenter_type: plan
-          commenter_input: ${{ format('{0}{1}', steps.plan.outputs.stdout, steps.plan.outputs.stderr) }}
-          commenter_exitcode: ${{ steps.plan.outputs.exitcode }}
-
-      - name: Apply terraform plan
-        if: ${{ github.event_name != 'pull_request' && github.event.inputs.terraform_action  == 'apply' }}
-        run: |
-          cd ${TF_PATH}${{ matrix.module }}
-          terraform init -backend-config="key=${{ matrix.module }}.tfstate" -backend-config="resource_group_name=${BACKEND_CONFIG_RESOURCE_GROUP_NAME}" -backend-config="storage_account_name=${BACKEND_CONFIG_STORAGE_ACCOUNT_NAME}" -backend-config="container_name=${BACKEND_CONFIG_CONTAINER_NAME}"
-          terraform apply plan
+    - name: Terraform Apply
+      run: |
+        cd ${TF_PATH}${{ github.event.inputs.terraform_module }}
+        terraform apply -auto-approve tfplan
