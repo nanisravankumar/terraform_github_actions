@@ -46,9 +46,9 @@ env:
   ARM_TENANT_ID: 0cb5cf3e-229f-499e-9e48-d9a50a041577
   TF_PATH: ./env/base/
   VAR_PATH: ../../koreacentral/uat/
-  BACKEND_CONFIG_RESOURCE_GROUP_NAME: terraform-resources
-  BACKEND_CONFIG_STORAGE_ACCOUNT_NAME: srstoracctterraform
-  BACKEND_CONFIG_CONTAINER_NAME: stceconkrcuatstate
+  BACKEND_CONFIG_RESOURCE_GROUP_NAME: rg-econ-prod-state
+  BACKEND_CONFIG_STORAGE_ACCOUNT_NAME: srsteconprodstate
+  BACKEND_CONFIG_CONTAINER_NAME: stceconprodstate
 
 jobs:
   krcuat-10-50-module:
@@ -65,7 +65,7 @@ jobs:
       - uses: hashicorp/setup-terraform@v1
         with:
           terraform_version: 1.11.4
-          
+
       - name: Azure Login
         uses: azure/login@v2
         with:
