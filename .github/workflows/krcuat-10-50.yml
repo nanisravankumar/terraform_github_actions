@@ -67,7 +67,7 @@ jobs:
       - name: Azure Login
         uses: azure/login@v2
         with:
-            creds: ${{ secrets.AZURE_CREDENTIALS }}
+            creds: ${{ secrets.ARM_NON_PROD_CLIENT_SECRET }}
 
       - name: Show terraform version
         run: |
@@ -114,7 +114,7 @@ jobs:
       - name: Azure Login
         uses: azure/login@v2
         with:
-            creds: ${{ secrets.AZURE_CREDENTIALS }}
+            creds: ${{ secrets.ARM_NON_PROD_CLIENT_SECRET }}
 
       - name: Validate and check format of terraform
         if: ${{ github.event_name == 'pull_request'}}
