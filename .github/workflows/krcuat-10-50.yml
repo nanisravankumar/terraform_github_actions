@@ -64,10 +64,11 @@ jobs:
       - uses: hashicorp/setup-terraform@v1
         with:
           terraform_version: 1.11.4
+
       - name: Azure Login
         uses: azure/login@v2
         with:
-            creds: ${{ secrets.ARM_NON_PROD_CLIENT_SECRET }}
+            creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Show terraform version
         run: |
@@ -87,6 +88,7 @@ jobs:
           cd ${TF_PATH}${{ github.event.inputs.terraform_module }}
           terraform init -backend-config="key=${{ github.event.inputs.terraform_module }}.tfstate" -backend-config="resource_group_name=${BACKEND_CONFIG_RESOURCE_GROUP_NAME}" -backend-config="storage_account_name=${BACKEND_CONFIG_STORAGE_ACCOUNT_NAME}" -backend-config="container_name=${BACKEND_CONFIG_CONTAINER_NAME}"
           terraform apply plan
+
   krcuat-10-50:
     environment:
       name: krcuat
@@ -114,7 +116,7 @@ jobs:
       - name: Azure Login
         uses: azure/login@v2
         with:
-            creds: ${{ secrets.ARM_NON_PROD_CLIENT_SECRET }}
+            creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Validate and check format of terraform
         if: ${{ github.event_name == 'pull_request'}}
