@@ -4,10 +4,12 @@ terraform {
     storage_account_name = "steconprodstate"
     container_name       = "stceconprodstate"
     key                  = "30-storage.tfstate"
+    subscription_id = "8275bd32-2df4-4467-9201-597dbf8e04a5"
   }
 }
 provider "azurerm" {
   features {}
+  subscription_id = "8275bd32-2df4-4467-9201-597dbf8e04a5"
 }
 
 data "azurerm_client_config" "current" {}
