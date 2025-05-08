@@ -81,8 +81,10 @@ jobs:
         id: plan
         run: |
           cd ${TF_PATH}${{ github.event.inputs.terraform_module }}
-          terraform init -backend-config="key=${{ github.event.inputs.terraform_module }}.tfstate" -backend-config="resource_group_name=${BACKEND_CONFIG_RESOURCE_GROUP_NAME}" -backend-config="storage_account_name=${BACKEND_CONFIG_STORAGE_ACCOUNT_NAME}" -backend-config="container_name=${BACKEND_CONFIG_CONTAINER_NAME}"
-          terraform plan -var-file="${VAR_PATH}${{ github.event.inputs.terraform_module }}/${{ github.event.inputs.terraform_module }}.auto.tfvars" -out plan
+          terraform init
+          terraform plan 
+        #   terraform init -backend-config="key=${{ github.event.inputs.terraform_module }}.tfstate" -backend-config="resource_group_name=${BACKEND_CONFIG_RESOURCE_GROUP_NAME}" -backend-config="storage_account_name=${BACKEND_CONFIG_STORAGE_ACCOUNT_NAME}" -backend-config="container_name=${BACKEND_CONFIG_CONTAINER_NAME}"
+        #   terraform plan -var-file="${VAR_PATH}${{ github.event.inputs.terraform_module }}/${{ github.event.inputs.terraform_module }}.auto.tfvars" -out plan
 
       - name: Apply terraform plan for ${{ github.event.inputs.terraform_module }}
         if: ${{ github.event_name != 'pull_request' && github.event.inputs.terraform_action == 'apply' }}
@@ -135,8 +137,10 @@ jobs:
         id: plan
         run: |
           cd ${TF_PATH}${{ matrix.module }}
-          terraform init -backend-config="key=${{ matrix.module }}.tfstate" -backend-config="resource_group_name=${BACKEND_CONFIG_RESOURCE_GROUP_NAME}" -backend-config="storage_account_name=${BACKEND_CONFIG_STORAGE_ACCOUNT_NAME}" -backend-config="container_name=${BACKEND_CONFIG_CONTAINER_NAME}"
-          terraform plan -var-file="${VAR_PATH}${{ matrix.module }}/${{ matrix.module }}.auto.tfvars" -out plan
+          terraform init
+          terraform plan 
+        #   terraform init -backend-config="key=${{ matrix.module }}.tfstate" -backend-config="resource_group_name=${BACKEND_CONFIG_RESOURCE_GROUP_NAME}" -backend-config="storage_account_name=${BACKEND_CONFIG_STORAGE_ACCOUNT_NAME}" -backend-config="container_name=${BACKEND_CONFIG_CONTAINER_NAME}"
+        #   terraform plan -var-file="${VAR_PATH}${{ matrix.module }}/${{ matrix.module }}.auto.tfvars" -out plan
 
       - name: Post plan diff to PR
         uses: robburger/terraform-pr-commenter@v1

@@ -1,10 +1,10 @@
 terraform {
-#   backend "azurerm" {
-#     resource_group_name  = "rg-econ-prod-state"
-#     storage_account_name = "srsteconprodstate"
-#     container_name       = "stceconprodstate"
-#     key                  = "10-network.tfstate"
-#   }
+  backend "azurerm" {
+    resource_group_name  = "rg-econ-prod-state"
+    storage_account_name = "srsteconprodstate"
+    container_name       = "stceconprodstate"
+    key                  = "10-network.tfstate"
+  }
 }
 provider "azurerm" {
   features {}
