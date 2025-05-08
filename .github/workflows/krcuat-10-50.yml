@@ -51,7 +51,7 @@ jobs:
     name: Terraform module execution for ${{ github.event.inputs.terraform_module }}
     environment:
       name: krcuat
-    runs-on: [self-hosted, aks-gha-runners]
+    runs-on: ubuntu-latest
     if: ${{ github.event.inputs.terraform_run_mode == 'module' }}
 
     steps:
@@ -95,7 +95,7 @@ jobs:
   krcuat-10-50:
     environment:
       name: krcuat
-    runs-on: [self-hosted, aks-gha-runners]
+    runs-on: ubuntu-latest
     if: ${{ github.event.inputs.terraform_run_mode != 'module' }}
     timeout-minutes: 30
     strategy:
